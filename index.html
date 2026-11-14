@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXOGAMS | Tienda de Videojuegos</title>
+    <link rel="stylesheet" href="estilos.css">
+    <style>
+        /* Estilos directos para asegurar el renderizado correcto */
+        .carrito-flotante-esquina {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background-color: #2ed573;
+            color: #ffffff;
+            padding: 15px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            font-weight: bold;
+            font-size: 1.1rem;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge-contador {
+            background-color: #ff4757;
+            color: #ffffff;
+            border-radius: 50%;
+            padding: 3px 8px;
+            font-size: 0.85rem;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.activo {
+            display: flex;
+        }
+
+        .modal-contenido {
+            background-color: #1e1e2f;
+            color: #ffffff;
+            width: 90%;
+            max-width: 480px;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.6);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn-cerrar-modal {
+            background: transparent;
+            border: none;
+            color: #ff4757;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .item-carrito {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #2a2a40;
+        }
+
+        .opciones-pago {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .opcion-pago-label {
+            background: #2a2a40;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-pagar {
+            background: #2ed573;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+
+        .btn-vaciar {
+            background: #ff4757;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        .tarjeta-producto img {
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        
+        .tarjeta-producto img:hover {
+            opacity: 0.85;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Encabezado -->
+    <header class="encabezado">
+        <div class="logo">🎮 NEXOGAMS</div>
+        <nav class="navegacion">
+            <a href="#">Inicio</a>
+            <a href="#catalogo">Catálogo</a>
+            <a href="#explicacion">Explicación del Código</a>
+        </nav>
+    </header>
+
+    <!-- Banner -->
+    <section class="banner">
+        <h1>Tienda de Videojuegos - Práctica JS</h1>
+        <div id="contenedor-bienvenida"></div>
+    </section>
+
+    <!-- Catálogo de productos -->
+    <main class="contenedor-principal" id="catalogo">
+        <h2>Catálogo Gamer</h2>
+        
+        <!-- Grilla donde se cargan las tarjetas -->
+        <div class="grilla-productos" id="grilla-productos"></div>
+
+        <!-- Guía Didáctica -->
+        <section class="seccion-educativa" id="explicacion">
+            <h2>📚 Guía Didáctica: ¿Qué funciones usamos aquí?</h2>
+            <div class="caja-explicacion">
+                <ul>
+                    <li><code>mostrarBienvenida()</code>: Devuelve la etiqueta HTML del mensaje de bienvenida.</li>
+                    <li><code>calcularDescuento(precio, porcentaje)</code>: Realiza la operación matemática y devuelve el precio reducido.</li>
+                    <li><code>evaluarStock(cantidad)</code>: Genera la etiqueta del stock según disponibilidad.</li>
+                    <li><code>formatearNombreProducto(texto)</code>: Convierte el texto a mayúsculas.</li>
+                    <li><code>agregarAlCarrito(id)</code>: Añade juegos al carrito activándose desde el botón o haciendo clic en la imagen.</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <!-- Carrito Flotante Fijo en la Esquina Inferior Derecha -->
+    <div class="carrito-flotante-esquina" onclick="abrirModalCarrito()">
+        🛒 <span>Carrito</span>
+        <span id="cant-carrito" class="badge-contador">0</span>
+    </div>
+
+    <!-- Modal de Compras y Métodos de Pago -->
+    <div id="modal-carrito" class="modal-overlay">
+        <div class="modal-contenido">
+            <div class="modal-header">
+                <h3>🛒 Tu Carrito de Compras</h3>
+                <button class="btn-cerrar-modal" onclick="cerrarModalCarrito()">&times;</button>
+            </div>
+            
+            <div id="lista-carrito"></div>
+
+            <div style="margin-top: 15px; font-size: 1.1rem; text-align: right;">
+                <strong>Total: $<span id="total-carrito">0.00</span></strong>
+            </div>
+
+            <div class="opciones-pago">
+                <h4>Selecciona un Método de Pago:</h4>
+                <label class="opcion-pago-label">
+                    <input type="radio" name="metodo-pago" value="Tarjeta de Crédito / Débito" checked>
+                    💳 Tarjeta de Crédito / Débito
+                </label>
+                <label class="opcion-pago-label">
+                    <input type="radio" name="metodo-pago" value="PayPal">
+                    🟦 PayPal
+                </label>
+                <label class="opcion-pago-label">
+                    <input type="radio" name="metodo-pago" value="Criptomonedas">
+                    🪙 Criptomonedas (BTC/USDT)
+                </label>
+            </div>
+
+            <button class="btn-pagar" onclick="procesarPago()">Pagar Ahora</button>
+            <button class="btn-vaciar" onclick="vaciarCarrito()">Vaciar Carrito</button>
+        </div>
+    </div>
+
+    <footer class="pie-pagina">
+        <p>&copy; <span id="anio-footer"></span> NEXOGAMS | Play • Collect • Compete</p>
+    </footer>
+
+    <!-- SCRIPT COLOCADO AL FINAL PARA GARANTIZAR QUE CARGUE EL DOM PRIMERO -->
+    <script>
+        const nombreTienda = "NEXOGAMS";
+        let carrito = [];
+
+        const productos = [
+            { id: 1, nombre: "Elden Ring", precio: 69.99, descuento: 10, stock: 5, imagen: "https://upload.wikimedia.org/wikipedia/en/b/b9/Elden_Ring_Box_art.jpg" },
+            { id: 2, nombre: "God of War Ragnarok", precio: 69.99, descuento: 0, stock: 12, imagen: "https://upload.wikimedia.org/wikipedia/en/e/ee/God_of_War_Ragnar%C3%B6k_cover.jpg" },
+            { id: 3, nombre: "Grand Theft Auto VGrand Theft Auto VI", precio: 29.99, descuento: 50, stock: 10, imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRz-kYfAV_fMFkm_ElDecbjsCTItOtrH1lv3Vl-sL71R0NIwWPCEVhNbXNa&s=10" },
+            { id: 4, nombre: "Zelda Tears of the Kingdom", precio: 59.99, descuento: 15, stock: 8, imagen: "https://upload.wikimedia.org/wikipedia/en/f/fb/The_Legend_of_Zelda_Tears_of_the_Kingdom_cover.jpg" },
+            { id: 5, nombre: "Call of Duty: Ghosts", precio: 39.99, descuento: 25, stock: 15, imagen: "https://upload.wikimedia.org/wikipedia/en/9/9c/Call_of_duty_ghosts_box_art.jpg" },
+            { id: 6, nombre: "The Hunter: Call of the Wild", precio: 19.99, descuento: 50, stock: 20, imagen: "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/518790/header.jpg" },
+            { id: 7, nombre: "Red Dead Redemption 2", precio: 59.99, descuento: 25, stock: 0, imagen: "https://image.api.playstation.com/cdn/UP1004/CUSA03041_00/Hpl5MtwQgOVF9vJqlfui6SDB5Jl4oBSq.png" },
+            { id: 8, nombre: "Minecraft", precio: 29.99, descuento: 33, stock: 30, imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLVBS1xHSBtv30B0AIs715rez6jIeCh7ZSZJQY4xkFKA&s=10s://assets.nintendo.com/image/upload/ar_16:9,c_lpad,w_650/b_white/f_auto/q_auto/ncom/software/switch/70010000000964/811461b8d1c4eec10b005213656c700688463c6395b05a5a176868df32aa410b" }
+        ];
+
+        function mostrarBienvenida() {
+            return "<p class='mensaje-bienvenida'>🎮 ¡Bienvenido a NEXOGAMS! Play • Collect • Compete - Las mejores ofertas en videojuegos.</p>";
+        }
+
+        function calcularDescuento(precioOriginal, porcentajeDescuento) {
+            let descuento = precioOriginal * (porcentajeDescuento / 100);
+            let precioFinal = precioOriginal - descuento;
+            return { descuento, precioFinal };
+        }
+
+        function evaluarStock(cantidad) {
+            return cantidad > 0 
+                ? `<span class="badge disponible">Disponible (${cantidad} unids)</span>` 
+                : `<span class="badge agotado">Agotado</span>`;
+        }
+
+        function formatearNombreProducto(texto) {
+            return texto.toUpperCase();
+        }
+
+        function renderizarCatalogo() {
+            const grilla = document.getElementById("grilla-productos");
+            if (!grilla) return;
+
+            let htmlProductos = "";
+
+            productos.forEach(item => {
+                let bloquePrecio = "";
+                let precioFinalJuego = item.precio;
+
+                if (item.descuento > 0) {
+                    const res = calcularDescuento(item.precio, item.descuento);
+                    precioFinalJuego = res.precioFinal;
+                    bloquePrecio = `
+                        <p class="precio-original">$${item.precio.toFixed(2)}</p>
+                        <span class="descuento-texto">-${item.descuento}% OFF (Ahorras $${res.descuento.toFixed(2)})</span>
+                        <p class="precio-final">$${precioFinalJuego.toFixed(2)}</p>
+                    `;
+                } else {
+                    bloquePrecio = `<p class="precio-final">$${item.precio.toFixed(2)}</p>`;
+                }
+
+                htmlProductos += `
+                    <div class="tarjeta-producto">
+                        <img src="${item.imagen}" alt="${item.nombre}" onclick="agregarAlCarrito(${item.id})">
+                        <div class="info-producto">
+                            <h3>${formatearNombreProducto(item.nombre)}</h3>
+                            <div class="estado-stock">${evaluarStock(item.stock)}</div>
+                            <div class="bloque-precio">${bloquePrecio}</div>
+                            <button class="btn-comprar" ${item.stock === 0 ? 'disabled' : ''} onclick="agregarAlCarrito(${item.id})">
+                                ${item.stock > 0 ? '🛒 Comprar' : 'Sin Stock'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            grilla.innerHTML = htmlProductos;
+        }
+
+        function agregarAlCarrito(idProducto) {
+            const producto = productos.find(p => p.id === idProducto);
+            if (!producto || producto.stock === 0) {
+                alert("Este juego está agotado.");
+                return;
+            }
+
+            let precioFinal = producto.precio;
+            if (producto.descuento > 0) {
+                precioFinal = producto.precio - (producto.precio * (producto.descuento / 100));
+            }
+
+            carrito.push({ nombre: producto.nombre, precio: precioFinal });
+            actualizarUI();
+            abrirModalCarrito();
+        }
+
+        function actualizarUI() {
+            document.getElementById("cant-carrito").innerText = carrito.length;
+            const contenedorLista = document.getElementById("lista-carrito");
+            let total = 0;
+
+            if (carrito.length === 0) {
+                contenedorLista.innerHTML = "<p style='text-align:center; color:#aaa;'>El carrito está vacío.</p>";
+            } else {
+                let htmlLista = "";
+                carrito.forEach(item => {
+                    total += item.precio;
+                    htmlLista += `
+                        <div class="item-carrito">
+                            <span>${item.nombre}</span>
+                            <span><strong>$${item.precio.toFixed(2)}</strong></span>
+                        </div>
+                    `;
+                });
+                contenedorLista.innerHTML = htmlLista;
+            }
+
+            document.getElementById("total-carrito").innerText = total.toFixed(2);
+        }
+
+        function vaciarCarrito() {
+            carrito = [];
+            actualizarUI();
+        }
+
+        function abrirModalCarrito() {
+            document.getElementById("modal-carrito").classList.add("activo");
+        }
+
+        function cerrarModalCarrito() {
+            document.getElementById("modal-carrito").classList.remove("activo");
+        }
+
+        function procesarPago() {
+            if (carrito.length === 0) {
+                alert("Tu carrito está vacío.");
+                return;
+            }
+            const metodo = document.querySelector('input[name="metodo-pago"]:checked').value;
+            alert(`¡Pago completado con ${metodo}!\n\nGracias por comprar en NEXOGAMS.`);
+            vaciarCarrito();
+            cerrarModalCarrito();
+        }
+
+        // Cargar todo al finalizar la lectura del documento
+        window.onload = function() {
+            document.getElementById("contenedor-bienvenida").innerHTML = mostrarBienvenida();
+            document.getElementById("anio-footer").innerText = new Date().getFullYear();
+            renderizarCatalogo();
+            actualizarUI();
+        };
+    </script>
+</body>
+</html>
