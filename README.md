@@ -11,8 +11,4 @@ Aplicación web interactiva desarrollada de forma individual como proyecto final
 * **JavaScript (ES6+):** Manipulación dinámica del DOM, cálculo de descuentos (`calcularDescuento`), validación de inventario (`evaluarStock`) e interactividad del carrito (`agregarAlCarrito`).
 
 ## 👨‍💻 Autor
-* **[Escribe aquí tu Nombre Completo]** - [@20007714-dotcom](https://github.com/20007714-dotcom)
-
-## 📦 Cómo ejecutar localmente
-1. Clona este repositorio: `git clone https://github.com/20007714-dotcom/nexogams.git`
-2. Abre el archivo `index.html` en tu navegador web.
+* **Erick Edenilson Escobar** - [@20007714-dotcom](https://github.com/20007714-dotcom)
